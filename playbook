@@ -1,0 +1,85 @@
+---
+- hosts: linuxservers
+  vars:
+    http_port: 80
+    max_clients: 200
+  remote_user: root
+  tasks:
+
+  - name: standaard vim en git
+    apt:
+          name: "{ packages }"
+	  state: present
+    vars:
+          packages:
+                  - git
+                  - vim
+
+  - name: git map aanmaken
+    file:
+      path: /home/kasper/git
+      state: directory
+      owner: kasper
+      mode: 0775
+
+---
+- hosts: webservers
+  vars:
+    http_port: 80
+    max_clients: 200
+  remote_user: root
+  tasks:
+  - name: ensure nginx is at the latest version
+    apt:
+          name: "{ packages }"
+          state: present
+    vars:
+          packages:
+                  - nginx
+                  - php7
+
+  - name: write the apache config file
+    template:
+      src: /srv/nginx_conf.j2
+      dest: /etc/@@@@.conf
+    notify:
+    - restart nginx
+  - name: zekerweten dat nginx runt
+    service:
+      name: nginx
+      state: started
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
+
+---
+- hosts: linuxservers
+  vars:
+
+  remote_user: root
+  tasks:
+  - name: standaard vim en git
+    apt:
+          name: "{ packages }"
+          state: present
+    vars:
+          packages:
+                  - default-jdk
+                  - wget
+  - name: minecraft map aanmaken
+    file:
+      path: /games/minecraft
+      state: directory
+      owner: kasper
+      mode: 0775
+      recurse: yes
+
+  - name: Minecraft downloaden (vaste versie)
+    command: cd /games/minecraft
+    command: wget -O minecraft_1.14.jar https://launcher.mojang.com/v1/objects/3dc3d84a581f14691199cf6831b71ed1296a9fdf/server.jar
+    #name: server start downloaden
+  - git:
+    repo: 'https://github.com/KasperGit/games.git'
+    dest: /

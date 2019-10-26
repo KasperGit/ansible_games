@@ -5,7 +5,7 @@ all:
    linuxservers:
      hosts:
        linweb01.emmerveen.nl
-       mc.emmerveen.nl
+       lingam01.emmerveen.nl
    webservers:
      hosts:
        linweb01.emmerveen.nl
